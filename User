@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract StakingContract {
+    ERC20 public token;
+    mapping(address => uint256) public stakes;
+    mapping(address => uint256) public rewards;
+
+    event Staked(address indexed user, uint256 amount);
+    event Unstaked(address indexed user, uint256 amount);
+    event RewardPaid(address indexed user, uint256 reward);
+
+    constructor(address _token) {
+        token = ERC20(_token);
+    }
+
+    function stakeTokens(uint256 _amount) external {
+        // Transfer Mock tokens to this contract for staking
+        token.transferFrom(msg.sender, address(this), _amount);
+
+        // Update staking balance
+        stakes[msg.sender] = stakes[msg.sender] + _amount;
+
+        emit Staked(msg.sender, _amount);
+    }
+
+    function unstakeTokens(uint256 _amount) external {
+        require(stakes[msg.sender] >= _amount, "Cannot unstake more than you have staked.");
+
+        // Update staking balance
+        stakes[msg.sender] = stakes[msg.sender] - _amount;
+
+        // Transfer Mock tokens back to the user
+        token.transfer(msg.sender, _amount);
+
+        emit Unstaked(msg.sender, _amount);
+    }
+
+    function calculateReward(address _user) public view returns(uint256) {
+        // Calculate reward. For simplicity, let's say the reward is equal to the stake.
+        return stakes[_user];
+    }
+
+    function distributeRewards() external {
+        uint256 reward = calculateReward(msg.sender);
+
+        // Update reward balance
+        rewards[msg.sender] = rewards[msg.sender] + reward;
+
+        emit RewardPaid(msg.sender, reward);
+    }
+
+    function claimReward() external {
+        uint256 reward = rewards[msg.sender];
+
+        require(reward > 0, "No rewards available for this address.");
+
+        // Update reward balance
+        rewards[msg.sender] = 0;
+
+        // Transfer reward tokens to the user
+        token.transfer(msg.sender, reward);
+
+        emit RewardPaid(msg.sender, reward);
+    }
+}
