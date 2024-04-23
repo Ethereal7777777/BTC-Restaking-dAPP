@@ -1,0 +1,37 @@
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract StakingContract {
+    ERC20 public token;
+    mapping(address => uint256) public stakes;
+    
+    event Staked(address indexed user, uint256 amount);
+    event Unstaked(address indexed user, uint256 amount);
+
+    constructor(address _token) {
+        token = ERC20(_token);
+    }
+
+    function stake(uint256 amount) public {
+        // Transfer the tokens to this contract
+        token.transferFrom(msg.sender, address(this), amount);
+
+        // Update the stake amount
+        stakes[msg.sender] += amount;
+
+        emit Staked(msg.sender, amount);
+    }
+
+    function unstake(uint256 amount) public {
+        require(amount <= stakes[msg.sender], "Cannot unstake more than you have staked.");
+
+        // Update the stake amount
+        stakes[msg.sender] -= amount;
+
+        // Transfer the tokens back to the staker
+        token.transfer(msg.sender, amount);
+
+        emit Unstaked(msg.sender, amount);
+    }
+}
