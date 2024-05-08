@@ -1,0 +1,25 @@
+import React, { useState } from 'react';
+
+const RestakingApp = () => {
+  const [stakeAmount, setStakeAmount] = useState(0);
+
+  const handleStake = () => {
+    // Call your staking function here
+    console.log(`Staking ${stakeAmount} BTC`);
+  };
+
+  return (
+    <div>
+      <h1>Bitcoin Restaking App</h1>
+      <input
+        type="number"
+        value={stakeAmount}
+        onChange={e => setStakeAmount(e.target.value)}
+        placeholder="Enter amount to stake in BTC"
+      />
+      <button onClick={handleStake}>Stake</button>
+    </div>
+  );
+};
+
+export default RestakingApp;
